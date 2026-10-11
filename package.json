@@ -1,0 +1,15 @@
+{
+  "name": "eldercare-connect",
+  "version": "1.0.0",
+  "private": true,
+  "description": "ElderCare Connect - Old Age Home Management & Care Support System",
+  "scripts": {
+    "dev": "vite --port 3000 --open",
+    "start": "vite --port 3000 --open",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^6.0.0"
+  }
+}

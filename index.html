@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ElderCare Connect</title>
+  <meta name="description" content="Old Age Home Management and Care Support System">
+  <meta name="theme-color" content="#5b93e5">
+  
+  <!-- Modern Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="font-normal font-size-medium">
+  <!-- Top Navigation & Status -->
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="brand-group">
+        <div class="brand-icon">
+          <i data-lucide="heart-handshake"></i>
+        </div>
+        <div class="brand-text">
+          <div class="brand-title-wrap">
+            <h1 class="brand-title">ElderCare Connect</h1>
+          </div>
+          <p class="brand-subtitle">Old Age Home Care System</p>
+        </div>
+      </div>
+
+      <!-- Quick Actions & Role -->
+      <div class="header-actions">
+        <div class="accessibility-ctrls" title="Adjust text size">
+          <button id="btn-font-toggle" class="btn-icon" aria-label="Toggle text size">
+            <span class="font-indicator">Aa</span>
+          </button>
+        </div>
+
+        <div class="status-pill" id="sync-status" title="Offline ready storage">
+          <span class="status-dot"></span>
+          <span class="status-label">Offline Ready</span>
+        </div>
+
+        <div class="role-selector-wrap">
+          <span class="role-label">Role:</span>
+          <select id="role-select" class="role-dropdown" aria-label="Select role">
+            <option value="caretaker" selected>Caretaker</option>
+            <option value="volunteer">Volunteer</option>
+            <option value="doctor">Doctor</option>
+            <option value="donor">Donor</option>
+          </select>
+        </div>
+
+        <button id="btn-emergency-sos" class="btn btn-sos pulse-soft" aria-label="Emergency SOS">
+          <i data-lucide="phone-call"></i>
+          <span>Emergency SOS</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <nav class="app-nav" aria-label="Main Navigation">
+      <ul class="nav-list">
+        <li>
+          <button class="nav-btn active" data-tab="dashboard">
+            <i data-lucide="layout-dashboard"></i>
+            <span>Dashboard</span>
+          </button>
+        </li>
+        <li>
+          <button class="nav-btn" data-tab="care">
+            <i data-lucide="users"></i>
+            <span>Residents & Daily Care</span>
+            <span class="nav-count" id="pending-tasks-badge">6</span>
+          </button>
+        </li>
+        <li>
+          <button class="nav-btn" data-tab="health">
+            <i data-lucide="stethoscope"></i>
+            <span>Health & Appointments</span>
+            <span class="nav-count badge-warning" id="health-followup-badge">3</span>
+          </button>
+        </li>
+        <li>
+          <button class="nav-btn" data-tab="maintenance">
+            <i data-lucide="wrench"></i>
+            <span>Facility & Repairs</span>
+            <span class="nav-count badge-danger" id="repairs-badge">2</span>
+          </button>
+        </li>
+        <li>
+          <button class="nav-btn" data-tab="donations">
+            <i data-lucide="gift"></i>
+            <span>Volunteers & Supplies</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- Main Content Container -->
+  <main class="app-main">
+    
+    <!-- ========================================== -->
+    <!-- 1. DASHBOARD VIEW                          -->
+    <!-- ========================================== -->
+    <section id="view-dashboard" class="tab-view active">
+      <div class="view-header">
+        <div>
+          <h2 class="view-title">Caretaker Overview</h2>
+          <p class="view-subtitle" id="dashboard-date-str">Daily care and operations status</p>
+        </div>
+        <div class="view-actions">
+          <button class="btn btn-secondary" id="btn-quick-export">
+            <i data-lucide="printer"></i>
+            <span>Print Care Log</span>
+          </button>
+          <button class="btn btn-primary" id="btn-new-care-round">
+            <i data-lucide="check-circle-2"></i>
+            <span>Quick Care Check</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Core Metrics Row -->
+      <div class="metrics-grid">
+        <div class="metric-card card-blue" data-nav-target="care">
+          <div class="metric-icon-wrap">
+            <i data-lucide="users"></i>
+          </div>
+          <div class="metric-body">
+            <div class="metric-value" id="stat-residents-count">24</div>
+            <div class="metric-label">Residents</div>
+            <span class="metric-hint">Active profiles</span>
+          </div>
+        </div>
+
+        <div class="metric-card card-green" data-nav-target="care">
+          <div class="metric-icon-wrap">
+            <i data-lucide="check-square"></i>
+          </div>
+          <div class="metric-body">
+            <div class="metric-value" id="stat-tasks-progress">18/24</div>
+            <div class="metric-label">Care Tasks Done</div>
+            <div class="progress-bar-small">
+              <div class="progress-fill" id="stat-tasks-bar" style="width: 75%;"></div>
+            </div>
+            <span class="metric-hint" id="stat-tasks-remaining-hint">6 tasks remaining</span>
+          </div>
+        </div>
+
+        <div class="metric-card card-amber" data-nav-target="health">
+          <div class="metric-icon-wrap">
+            <i data-lucide="activity"></i>
+          </div>
+          <div class="metric-body">
+            <div class="metric-value" id="stat-health-followups">3</div>
+            <div class="metric-label">Health Follow-ups</div>
+            <span class="metric-hint">Follow-ups scheduled</span>
+          </div>
+        </div>
+
+        <div class="metric-card card-rose" data-nav-target="maintenance">
+          <div class="metric-icon-wrap">
+            <i data-lucide="alert-triangle"></i>
+          </div>
+          <div class="metric-body">
+            <div class="metric-value" id="stat-open-repairs">2</div>
+            <div class="metric-label">Open Repairs</div>
+            <span class="metric-hint">Awaiting maintenance</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Priority Action Section -->
+      <div class="dashboard-columns">
+        <!-- Today's Priority List -->
+        <div class="card priority-card">
+          <div class="card-header">
+            <div>
+              <h3 class="card-title">Today's Priority List</h3>
+              <p class="card-subtitle">Urgent tasks requiring attention</p>
+            </div>
+            <span class="badge badge-primary">High Priority</span>
+          </div>
+
+          <div class="priority-list" id="dashboard-priority-items">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+
+        <!-- Sidebar Summary -->
+        <div class="dash-sidebar">
+          <!-- Facility Weather Alert -->
+          <div class="card weather-card">
+            <div class="weather-inner">
+              <div class="weather-icon-badge">
+                <i data-lucide="cloud-rain"></i>
+              </div>
+              <div class="weather-info">
+                <h4>Weather Advisory</h4>
+                <p>Heavy rain forecast. Inspect Dorm B ceiling cover and drains.</p>
+                <div class="weather-status-tag">Dormitory B Inspection Required</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Volunteers On Duty -->
+          <div class="card volunteers-active-card">
+            <div class="card-header">
+              <h3 class="card-title">Volunteers on Duty</h3>
+              <button class="btn-text" id="btn-see-all-volunteers">View Schedule</button>
+            </div>
+            <div class="volunteer-mini-list" id="active-volunteers-list">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+
+          <!-- Needed Supplies Alert -->
+          <div class="card supplies-alert-card">
+            <div class="card-header">
+              <h3 class="card-title">Urgent Supplies</h3>
+              <span class="badge badge-warning">Low Stock</span>
+            </div>
+            <div class="supplies-mini-list" id="urgent-supplies-list">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- 2. RESIDENTS & DAILY CARE MANAGEMENT       -->
+    <!-- ========================================== -->
+    <section id="view-care" class="tab-view">
+      <div class="view-header">
+        <div>
+          <h2 class="view-title">Resident & Daily Care Management</h2>
+          <p class="view-subtitle">Profiles, daily nutrition, hygiene assistance, and routines</p>
+        </div>
+        <div class="view-actions">
+          <button class="btn btn-secondary" id="btn-filter-pending-only">
+            <i data-lucide="filter"></i>
+            <span>Pending Tasks Only</span>
+          </button>
+          <button class="btn btn-primary" id="btn-add-resident-modal">
+            <i data-lucide="user-plus"></i>
+            <span>Add Resident</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Search & Filters -->
+      <div class="filter-bar">
+        <div class="search-input-wrap">
+          <i data-lucide="search"></i>
+          <input type="text" id="resident-search" placeholder="Search by name, room, or condition...">
+        </div>
+        <div class="filter-pills" id="care-filter-pills">
+          <button class="filter-pill active" data-filter="all">All (24)</button>
+          <button class="filter-pill" data-filter="pending">Pending Care (6)</button>
+          <button class="filter-pill" data-filter="special">Special Assistance (8)</button>
+          <button class="filter-pill" data-filter="dorm-a">Dorm A</button>
+          <button class="filter-pill" data-filter="dorm-b">Dorm B</button>
+        </div>
+      </div>
+
+      <!-- Layout: Resident Cards & Daily Checklist Panel -->
+      <div class="care-layout">
+        <div class="residents-grid" id="residents-card-grid">
+          <!-- Dynamically populated -->
+        </div>
+
+        <div class="care-detail-panel" id="resident-detail-panel">
+          <div class="panel-placeholder">
+            <div class="placeholder-icon">
+              <i data-lucide="user-check"></i>
+            </div>
+            <h3>Select a Resident</h3>
+            <p>Select any resident to view emergency contacts, medical notes, and complete daily routines.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- 3. HEALTH & EMERGENCY SUPPORT              -->
+    <!-- ========================================== -->
+    <section id="view-health" class="tab-view">
+      <div class="view-header">
+        <div>
+          <h2 class="view-title">Health & Emergency Tracker</h2>
+          <p class="view-subtitle">Checkup schedules, vitals observations, and emergency contacts</p>
+        </div>
+        <div class="view-actions">
+          <button class="btn btn-secondary" id="btn-call-oncall-doc">
+            <i data-lucide="phone"></i>
+            <span>Call Doctor</span>
+          </button>
+          <button class="btn btn-primary" id="btn-log-health-checkup">
+            <i data-lucide="plus"></i>
+            <span>Log Checkup / Vitals</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="health-grid">
+        <!-- Scheduled Appointments -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h3 class="card-title">Scheduled Medical Checkups</h3>
+              <p class="card-subtitle">Upcoming doctor visits and clinic appointments</p>
+            </div>
+            <span class="badge badge-primary">3 Scheduled</span>
+          </div>
+          <div class="appointments-list" id="appointments-list">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+
+        <!-- Health Observations -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h3 class="card-title">Health Observations & Notes</h3>
+              <p class="card-subtitle">Vitals, blood pressure, and medication notes</p>
+            </div>
+            <span class="badge badge-warning">Action Required</span>
+          </div>
+          <div class="vitals-observations-list" id="vitals-observations-list">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Emergency Assistance Directory -->
+      <div class="card mt-6">
+        <div class="card-header">
+          <div>
+            <h3 class="card-title">Emergency Assistance Directory</h3>
+            <p class="card-subtitle">One-tap contacts for immediate medical and safety response</p>
+          </div>
+          <span class="badge badge-trust">Offline Accessible</span>
+        </div>
+        <div class="emergency-cards-grid" id="emergency-contacts-grid">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- 4. INFRASTRUCTURE & MAINTENANCE            -->
+    <!-- ========================================== -->
+    <section id="view-maintenance" class="tab-view">
+      <div class="view-header">
+        <div>
+          <h2 class="view-title">Facility & Maintenance Tracker</h2>
+          <p class="view-subtitle">Track structural repairs, safety fixtures, and costs</p>
+        </div>
+        <div class="view-actions">
+          <button class="btn btn-primary" id="btn-report-issue-modal">
+            <i data-lucide="plus"></i>
+            <span>Report Issue</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Summary Cards -->
+      <div class="facility-summary-row">
+        <div class="facility-stat-card card-rose">
+          <div class="stat-number" id="fac-stat-urgent">1</div>
+          <div class="stat-text">Urgent Hazards</div>
+        </div>
+        <div class="facility-stat-card card-amber">
+          <div class="stat-number" id="fac-stat-in-progress">1</div>
+          <div class="stat-text">In Progress</div>
+        </div>
+        <div class="facility-stat-card card-green">
+          <div class="stat-number" id="fac-stat-resolved">4</div>
+          <div class="stat-text">Resolved</div>
+        </div>
+        <div class="facility-stat-card card-blue">
+          <div class="stat-number" id="fac-stat-est-cost">₹14,500</div>
+          <div class="stat-text">Estimated Cost</div>
+        </div>
+      </div>
+
+      <!-- Issues List -->
+      <div class="card mt-6">
+        <div class="card-header">
+          <h3 class="card-title">Repair Requests & Hazards</h3>
+          <div class="status-filters" id="maintenance-filters">
+            <button class="filter-pill active" data-status="all">All</button>
+            <button class="filter-pill" data-status="open">Open</button>
+            <button class="filter-pill" data-status="in-progress">In Progress</button>
+            <button class="filter-pill" data-status="resolved">Resolved</button>
+          </div>
+        </div>
+
+        <div class="issues-list" id="maintenance-issues-list">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- 5. VOLUNTEERS & DONATIONS PORTAL           -->
+    <!-- ========================================== -->
+    <section id="view-donations" class="tab-view">
+      <div class="view-header">
+        <div>
+          <h2 class="view-title">Donations & Volunteers</h2>
+          <p class="view-subtitle">Track needed supplies, volunteer shifts, and donation records</p>
+        </div>
+        <div class="view-actions">
+          <button class="btn btn-secondary" id="btn-register-volunteer-modal">
+            <i data-lucide="user-plus"></i>
+            <span>Register Volunteer</span>
+          </button>
+          <button class="btn btn-primary" id="btn-add-donation-modal">
+            <i data-lucide="plus-circle"></i>
+            <span>Record Donation</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="donations-grid">
+        <!-- Needed Supplies -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h3 class="card-title">Essential Supplies Needed</h3>
+              <p class="card-subtitle">Current stock and donation needs</p>
+            </div>
+            <button class="btn-text" id="btn-add-supply-item">+ Add Supply Need</button>
+          </div>
+          <div class="supplies-checklist" id="supplies-list">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+
+        <!-- Volunteer Availability -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h3 class="card-title">Volunteer Shifts</h3>
+              <p class="card-subtitle">Active helper schedules</p>
+            </div>
+            <span class="badge badge-trust">Community</span>
+          </div>
+          <div class="volunteers-schedule-list" id="volunteers-roster">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Donations Ledger -->
+      <div class="card mt-6">
+        <div class="card-header">
+          <div>
+            <h3 class="card-title">Donation Records & Allocation</h3>
+            <p class="card-subtitle">Monetary and material donation logs</p>
+          </div>
+          <div class="ledger-summary">
+            <span class="ledger-pill">Received: <strong id="total-donations-val">₹48,200</strong></span>
+            <span class="ledger-pill pill-utilized">Allocated: <strong id="utilized-donations-val">₹39,800</strong></span>
+          </div>
+        </div>
+
+        <div class="donations-table-wrap">
+          <table class="data-table" id="donations-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Donor</th>
+                <th>Type</th>
+                <th>Item / Amount</th>
+                <th>Purpose</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="donations-table-body">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ========================================== -->
+  <!-- MODALS                                     -->
+  <!-- ========================================== -->
+
+  <!-- Emergency SOS Modal -->
+  <div class="modal-backdrop" id="modal-sos">
+    <div class="modal-sheet">
+      <div class="modal-header header-sos">
+        <div class="modal-title-wrap">
+          <span class="modal-badge-red">URGENT</span>
+          <h3 class="modal-title">Emergency Contacts</h3>
+        </div>
+        <button class="btn-close" data-close-modal>&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="sos-desc">Direct lines for emergency responders. Accessible offline.</p>
+        <div class="sos-actions-list">
+          <a href="tel:108" class="sos-action-card sos-ambulance">
+            <div class="sos-icon">
+              <i data-lucide="truck"></i>
+            </div>
+            <div class="sos-info">
+              <strong>Emergency Ambulance (108)</strong>
+              <span>Immediate medical transport</span>
+            </div>
+            <span class="sos-call-btn">Call 108</span>
+          </a>
+
+          <a href="tel:+919876543210" class="sos-action-card sos-doctor">
+            <div class="sos-icon">
+              <i data-lucide="stethoscope"></i>
+            </div>
+            <div class="sos-info">
+              <strong>Dr. Rajesh Sharma (Physician)</strong>
+              <span>Mobile: +91 98765 43210</span>
+            </div>
+            <span class="sos-call-btn">Call Doctor</span>
+          </a>
+
+          <a href="tel:+919812345678" class="sos-action-card sos-caretaker">
+            <div class="sos-icon">
+              <i data-lucide="phone"></i>
+            </div>
+            <div class="sos-info">
+              <strong>Sister Mary (Lead Caretaker)</strong>
+              <span>Staff Mobile: +91 98123 45678</span>
+            </div>
+            <span class="sos-call-btn">Call Staff</span>
+          </a>
+
+          <a href="tel:112" class="sos-action-card sos-police">
+            <div class="sos-icon">
+              <i data-lucide="shield-alert"></i>
+            </div>
+            <div class="sos-info">
+              <strong>Police & Emergency (112)</strong>
+              <span>Civil emergency response</span>
+            </div>
+            <span class="sos-call-btn">Call 112</span>
+          </a>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary w-full" data-close-modal>Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Resident Modal -->
+  <div class="modal-backdrop" id="modal-add-resident">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title">Register Resident</h3>
+        <button class="btn-close" data-close-modal>&times;</button>
+      </div>
+      <form id="form-add-resident">
+        <div class="modal-body form-grid">
+          <div class="form-group">
+            <label for="res-name">Full Name *</label>
+            <input type="text" id="res-name" required placeholder="e.g. Kamala Devi">
+          </div>
+          <div class="form-group">
+            <label for="res-age">Age & Gender *</label>
+            <input type="text" id="res-age" required placeholder="e.g. 76 yrs, Female">
+          </div>
+          <div class="form-group">
+            <label for="res-room">Room / Dorm *</label>
+            <input type="text" id="res-room" required placeholder="e.g. Room 104, Dorm A">
+          </div>
+          <div class="form-group">
+            <label for="res-mobility">Mobility Status</label>
+            <select id="res-mobility">
+              <option value="Independent">Independent</option>
+              <option value="Needs Walking Stick">Needs Walking Stick</option>
+              <option value="Wheelchair Bound">Wheelchair Bound</option>
+              <option value="Bedridden">Bedridden</option>
+            </select>
+          </div>
+          <div class="form-group full-width">
+            <label for="res-emergency">Emergency Contact (Name & Phone) *</label>
+            <input type="text" id="res-emergency" required placeholder="e.g. Ramesh (+91 98450 11223)">
+          </div>
+          <div class="form-group full-width">
+            <label for="res-diet">Diet & Conditions</label>
+            <textarea id="res-diet" rows="2" placeholder="e.g. Diabetic, Low sodium diet, Morning insulin."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-close-modal>Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Resident</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Report Issue Modal -->
+  <div class="modal-backdrop" id="modal-report-issue">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title">Report Facility Issue</h3>
+        <button class="btn-close" data-close-modal>&times;</button>
+      </div>
+      <form id="form-report-issue">
+        <div class="modal-body form-grid">
+          <div class="form-group full-width">
+            <label for="issue-title">Issue *</label>
+            <input type="text" id="issue-title" required placeholder="e.g. Dormitory B Roof Water Leakage">
+          </div>
+          <div class="form-group">
+            <label for="issue-location">Location *</label>
+            <input type="text" id="issue-location" required placeholder="e.g. Dorm B Ceiling">
+          </div>
+          <div class="form-group">
+            <label for="issue-urgency">Priority *</label>
+            <select id="issue-urgency">
+              <option value="High" selected>High Priority</option>
+              <option value="Medium">Medium Priority</option>
+              <option value="Low">Low Priority</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="issue-cost">Estimated Cost (₹)</label>
+            <input type="number" id="issue-cost" placeholder="e.g. 8500">
+          </div>
+          <div class="form-group">
+            <label for="issue-status">Status</label>
+            <select id="issue-status">
+              <option value="Open">Open</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Resolved">Resolved</option>
+            </select>
+          </div>
+          <div class="form-group full-width">
+            <label>Photo (Optional)</label>
+            <div class="file-upload-box">
+              <input type="file" id="issue-photo" accept="image/*" class="file-input">
+              <div class="upload-placeholder" id="upload-preview-area">
+                <i data-lucide="camera" style="margin-right: 6px;"></i>
+                <span>Choose photo or capture</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-close-modal>Cancel</button>
+          <button type="submit" class="btn btn-primary">Submit Report</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Register Volunteer Modal -->
+  <div class="modal-backdrop" id="modal-register-volunteer">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title">Register Volunteer</h3>
+        <button class="btn-close" data-close-modal>&times;</button>
+      </div>
+      <form id="form-register-volunteer">
+        <div class="modal-body form-grid">
+          <div class="form-group">
+            <label for="vol-name">Name *</label>
+            <input type="text" id="vol-name" required placeholder="e.g. Priya Sharma">
+          </div>
+          <div class="form-group">
+            <label for="vol-phone">Phone *</label>
+            <input type="tel" id="vol-phone" required placeholder="e.g. +91 98760 54321">
+          </div>
+          <div class="form-group">
+            <label for="vol-hours">Available Hours</label>
+            <input type="text" id="vol-hours" placeholder="e.g. 4 PM - 7 PM, Sat/Sun">
+          </div>
+          <div class="form-group">
+            <label for="vol-task">Role</label>
+            <select id="vol-task">
+              <option value="Meal Serving & Kitchen">Meal Serving & Kitchen</option>
+              <option value="Companionship & Reading">Companionship & Reading</option>
+              <option value="Mobility & Walk Assist">Mobility & Walk Assist</option>
+              <option value="Medical Escort">Medical Escort</option>
+              <option value="Cleaning & Sanitation">Cleaning & Sanitation</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-close-modal>Cancel</button>
+          <button type="submit" class="btn btn-primary">Register</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Record Donation Modal -->
+  <div class="modal-backdrop" id="modal-add-donation">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title">Record Donation</h3>
+        <button class="btn-close" data-close-modal>&times;</button>
+      </div>
+      <form id="form-add-donation">
+        <div class="modal-body form-grid">
+          <div class="form-group">
+            <label for="don-donor">Donor Name *</label>
+            <input type="text" id="don-donor" required placeholder="e.g. Rotary Club">
+          </div>
+          <div class="form-group">
+            <label for="don-type">Type *</label>
+            <select id="don-type">
+              <option value="Monetary">Monetary</option>
+              <option value="Food Rations">Food Rations</option>
+              <option value="Medical Supplies">Medical Supplies</option>
+              <option value="Bedding & Clothes">Bedding & Clothes</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="don-amount">Item / Amount *</label>
+            <input type="text" id="don-amount" required placeholder="e.g. ₹5,000 or 25kg Rice">
+          </div>
+          <div class="form-group">
+            <label for="don-purpose">Allocated Purpose</label>
+            <input type="text" id="don-purpose" placeholder="e.g. Roof Repair / Kitchen Rations">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-close-modal>Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Donation</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Log Health Modal -->
+  <div class="modal-backdrop" id="modal-log-health">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title">Log Health Checkup</h3>
+        <button class="btn-close" data-close-modal>&times;</button>
+      </div>
+      <form id="form-log-health">
+        <div class="modal-body form-grid">
+          <div class="form-group">
+            <label for="health-res-select">Resident *</label>
+            <select id="health-res-select" required></select>
+          </div>
+          <div class="form-group">
+            <label for="health-date">Date *</label>
+            <input type="date" id="health-date" required>
+          </div>
+          <div class="form-group">
+            <label for="health-bp">Blood Pressure</label>
+            <input type="text" id="health-bp" placeholder="e.g. 130/85 mmHg">
+          </div>
+          <div class="form-group">
+            <label for="health-sugar">Blood Sugar / Pulse</label>
+            <input type="text" id="health-sugar" placeholder="e.g. 140 mg/dL, Pulse 72">
+          </div>
+          <div class="form-group full-width">
+            <label for="health-notes">Observation Notes *</label>
+            <textarea id="health-notes" rows="2" required placeholder="Clinical observations and instructions..."></textarea>
+          </div>
+          <div class="form-group full-width">
+            <label for="health-followup">Follow-up Action</label>
+            <input type="text" id="health-followup" placeholder="e.g. Follow-up in 3 days.">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-close-modal>Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Record</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- App Script -->
+  <script src="app.js"></script>
+</body>
+</html>
